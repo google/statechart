@@ -23,14 +23,32 @@ Many features from the SCXML standard have been implemented.
 
 * History
 
-# Example Usage
+# Example
 Here's an example of a StateChart that describes a Microwave.
 
 ![Microwave StateChart](statechart/example/microwave_statechart.svg "Microwave StateChart")
 
 You can see [//statechart/example/microwave_example_main.cc](statechart/example/microwave_example_main.cc)
-for details on how to specify such a StateChart as a StateChart proto and how to
-use it in code.
+for details on how to specify such a StateChart as a StateChart proto and how to use it in code.
+
+# Usage
+
+To build the library you'll need bazel. You can download and install it from [here](https://www.bazel.build/).
+
+```
+# Download/Clone the repo.
+git clone https://github.com/google/statechart.git
+cd statechart
+
+# Build the library
+bazel build //statechart/...
+
+# Run unit tests
+bazel test //statechart/...
+
+# Run the Microwave example
+bazel run //statechart/example:microwave_example_main -- --alsologtostderr
+```
 
 # Disclaimer
 This is not an officially supported Google product.
