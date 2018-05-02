@@ -1,0 +1,19 @@
+syntax = "proto2";
+
+package example.microwave;
+
+message MicrowaveState {
+  enum Light {
+    UNKNOWN = 0;
+    OFF = 1;
+    ON = 2;
+  }
+  optional Light light = 1;
+
+  // The amount of cooking time left.
+  optional int32 cooking_duration_sec = 2;
+}
+
+message MicrowavePayload {
+  optional int32 duration_sec = 1;
+}

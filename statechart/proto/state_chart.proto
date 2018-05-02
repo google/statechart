@@ -1,0 +1,280 @@
+// Copyright 2018 The StateChart Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// This file contains protos that describe the behavior of a state machine.
+// They are designed to match as closely as possible the SCXML draft standard
+// (http://www.w3.org/TR/scxml/).
+//
+// With the exception the deviations described below, each XML <element> has a
+// corresponding protocol message, and the attributes allowed on that element
+// are represented as fields on the message.
+//
+// Comments are given in this file only when deviations from the standard were
+// necessitated by the unique limitations of protocol buffers. Please refer to
+// the documentation at the link above for more information.
+//
+// Deviations from the standard:
+//
+//  * Where an attribute on an element and a possible child of that element
+//    have a naming conflict, the attribute is renamed and a comment
+//    inserted. This is true for <state>'s 'initial' attribute and <scxml>'s
+//    'datamodel' attribute.
+//  * The elements <onentry>, <onexit> and <transition> are composed of a
+//    number of executable actions (such as <log>, <if>, <foreach>, etc). To
+//    preserve order it was necessary to create a wrapper protocol message,
+//    ExecutableElement, which can itself contain a single executable
+//    type.
+//  * The elements <scxml> and <state> can be composed of order-dependent
+//    sub-states, described using <state>, <parallel> and <final>. Although
+//    <scxml> and <state> have many possible children, those listed here are
+//    the only ones that care about the order. For this reason, another
+//    wrapper (StateElement) was created.
+//  * The <if>, <elseif> and <else> elements in XML are specified such that
+//    the top-level <if> element is composed of a mix of order-dependent
+//    executable elements and <elseif> and <else> elements, all as siblings.
+//    Achieving this in protos is complicated, so the <if> element is
+//    re-written in proto form as a top-level If message, which contains any
+//    number of condition-executables pairs.
+
+syntax = "proto2";
+
+option cc_enable_arenas = true;
+option java_outer_classname = "StateChartProto";
+option java_package = "com.google.statechart.config";
+
+package state_chart.config;
+
+// A union type of all elements of executable content.
+// This allows an ordering of heterogeneous executable elements.
+// All optional fields are mutually exclusive.
+message ExecutableElement {
+  optional Raise raise = 1;
+  optional Log log = 2;
+  optional Assign assign = 3;
+  optional Script script = 4;
+  optional If if = 5;
+  optional ForEach foreach = 6;
+  optional Send send = 7;
+  optional Cancel cancel = 8;
+}
+
+// A union type of all state-like elements.
+// This allows an ordering of heterogeneous state-like elements.
+// All optional fields are mutually exclusive.
+message StateElement {
+  optional State state = 1;
+  optional Parallel parallel = 2;
+  optional Final final = 3;
+}
+
+message Raise {
+  optional string event = 1;
+}
+
+message Log {
+  optional string label = 1 [default = ""];
+  optional string expr = 2;
+}
+
+message Assign {
+  optional string location = 1;
+  optional string expr = 2;
+}
+
+message Script {
+  optional string src = 1;
+
+  // The content of the script element.
+  optional string content = 2;
+}
+
+message If {
+  // A condition followed by executable content. This is similar to an <if> or
+  // <elseif> element when 'cond' is present. When 'cond' is absent, this is an
+  // <else> element.
+  message ConditionalExecutable {
+    // A boolean expression in the script language.
+    // An absent condition is always true.
+    optional string cond = 1;
+    repeated ExecutableElement executable = 2;
+  }
+  // A sequence of <if>, <elseif>, or <else> blocks.
+  // Any <else> block should appear as the last statement.
+  repeated ConditionalExecutable cond_executable = 1;
+}
+
+message ForEach {
+  optional string array = 1;
+  optional string item = 2;
+  optional string index = 3;
+
+  // Body of loop.
+  repeated ExecutableElement executable = 4;
+}
+
+message Transition {
+  // In SCXML this is a space separated list of event descriptors.
+  repeated string event = 1;
+  optional string cond = 2;
+  repeated string target = 3;
+  enum Type {
+    TYPE_INTERNAL = 0;
+    TYPE_EXTERNAL = 1;
+  }
+  optional Type type = 4 [default = TYPE_EXTERNAL];
+
+  // Body of executable content.
+  repeated ExecutableElement executable = 5;
+}
+
+message Data {
+  optional string id = 1;
+  optional string expr = 2;
+  optional string src = 3;
+}
+
+message DataModel {
+  repeated Data data = 1;
+}
+
+message Param {
+  optional string name = 1;
+  optional string expr = 2;
+  optional string location = 3;
+}
+
+message Content {
+  optional string expr = 1;
+  // The XML content body in the <content> element.
+  // Mutually exclusive with state_chart.
+  optional string content = 2;
+  // The special case where the content body is an embedded <scxml> document.
+  optional StateChart state_chart = 3;
+  // Other specialized kinds of body data should be handled in extensions.
+  extensions 20000 to max;
+}
+
+message Invoke {
+  optional string type = 1;
+  optional string typeexpr = 2;
+  optional string src = 3;
+  optional string srcexpr = 4;
+  optional string id = 5;
+  optional string idlocation = 6;
+  // In SCXML this is a space delimited list of locations.
+  repeated string namelist = 7;
+  optional bool autoforward = 8;
+
+  repeated Param param = 9;
+  repeated ExecutableElement finalize = 10;
+  optional Content content = 11;
+}
+
+message Send {
+  optional string event = 1;
+  optional string eventexpr = 2;
+  optional string target = 4;
+  optional string targetexpr = 5;
+  optional string type = 6;
+  optional string typeexpr = 7;
+  optional string id = 8;
+  optional string idlocation = 9;
+  optional string delay = 10;
+  optional string delayexpr = 11;
+  // In SCXML this is a space delimited list of locations.
+  repeated string namelist = 12;
+
+  repeated Param param = 13;
+  optional Content content = 14;
+}
+
+message Cancel {
+  optional string sendid = 1;
+  optional string sendidexpr = 2;
+}
+
+message History {
+  optional string id = 1;
+  enum Type {
+    TYPE_SHALLOW = 0;
+    TYPE_DEEP = 1;
+  }
+  optional Type type = 2 [default = TYPE_SHALLOW];
+
+  optional Transition transition = 3;
+}
+
+message Initial {
+  optional Transition transition = 1;
+}
+
+message State {
+  optional string id = 1;
+  // This is the 'initial' attribute of <state>.
+  repeated string initial_id = 2;
+
+  // This is the <initial> child element of <state>.
+  optional Initial initial = 3;
+  optional DataModel datamodel = 4;
+  repeated ExecutableElement onentry = 5;
+  repeated ExecutableElement onexit = 6;
+  repeated StateElement state = 7;
+  repeated Transition transition = 8;
+  repeated Invoke invoke = 9;
+  repeated History history = 10;
+}
+
+message Parallel {
+  optional string id = 1;
+
+  optional DataModel datamodel = 2;
+  repeated ExecutableElement onentry = 3;
+  repeated ExecutableElement onexit = 4;
+  // Constrained to only contain State or Parallel children. No Final allowed.
+  repeated StateElement state = 5;
+  repeated Transition transition = 6;
+  repeated Invoke invoke = 7;
+  repeated History history = 8;
+}
+
+message DoneData {
+  optional Content content = 1;
+  repeated Param param = 2;
+}
+
+message Final {
+  optional string id = 1;
+
+  repeated ExecutableElement onentry = 2;
+  repeated ExecutableElement onexit = 3;
+  optional DoneData donedata = 4;
+}
+
+// Top level state chart document, i.e., the <scxml> element.
+message StateChart {
+  repeated string initial = 1;
+  optional string name = 2;
+  // The 'datamodel' attribute of the <scxml> document.
+  optional string datamodel_type = 3 [default = "ecmascript"];
+  enum Binding {
+    BINDING_EARLY = 0;
+    BINDING_LATE = 1;
+  }
+  optional Binding binding = 4 [default = BINDING_EARLY];
+
+  // The <datamodel> element.
+  optional DataModel datamodel = 5;
+  optional Script script = 6;
+  repeated StateElement state = 7;
+}

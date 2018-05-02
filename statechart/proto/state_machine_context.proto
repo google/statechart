@@ -1,0 +1,55 @@
+// Copyright 2018 The StateChart Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+option cc_enable_arenas = true;
+option java_outer_classname = "StateMachineContextProto";
+option java_package = "com.google.statechart";
+
+package state_chart;
+
+// A serialized representation of the internals of a StateMachine.
+message StateMachineContext {
+
+  // A serialized representation of Runtime.
+  message Runtime {
+
+    // A serialized representation of active state elements in a state chart.
+    // These state elements can be state, parallel or final.
+    // These active state elements are arranged in a tree structure.
+    // ActiveStateElement represents a node in such a tree.
+    // TODO(srgandhe): Think of better format for serializing Runtime that
+    // allows to store/restore arbitrary properties for states.
+    message ActiveStateElement {
+      // 'id' attribute of a StateElement.
+      optional string id = 1;
+
+      // A set of child element(s) that are active.
+      repeated ActiveStateElement active_child = 2;
+    }
+
+    // A list of active states in this runtime.
+    repeated ActiveStateElement active_state = 1;
+
+    // Whether the state machine is running.
+    optional bool running = 2;
+  }
+
+  optional Runtime runtime = 1;
+
+  // Serialized string representation of the datamodel. This is obtained by
+  // calling datamodel.SerializeAsString().
+  optional string datamodel = 2;
+}
