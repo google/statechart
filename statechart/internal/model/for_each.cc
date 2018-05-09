@@ -16,7 +16,6 @@
 
 #include <glog/logging.h>
 
-#include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/substitute.h"
 #include "statechart/internal/datamodel.h"
@@ -36,7 +35,7 @@ bool ForEach::Execute(Runtime* runtime) const {
   VLOG(1) << absl::Substitute("ForEach(<$0, $1> : $2)", index_, item_, array_);
   auto* datamodel = runtime->mutable_datamodel();
   // Get the iterator.
-  auto iterator = absl::WrapUnique(datamodel->EvaluateIterator(array_));
+  auto iterator = datamodel->EvaluateIterator(array_);
   if (iterator == nullptr) {
     runtime->EnqueueExecutionError(absl::StrCat(
         "'ForEach' unable to get iterator for collection: ", array_));

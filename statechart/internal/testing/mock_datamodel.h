@@ -45,6 +45,8 @@ class MockIterator : public Iterator {
   explicit MockIterator(const std::vector<string>& collection)
       : index_(0), collection_(collection) {}
 
+  ~MockIterator() override = default;
+
   bool AtEnd() const override { return index_ >= collection_.size(); }
 
   bool Next() override {

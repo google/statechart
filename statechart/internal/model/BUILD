@@ -128,7 +128,6 @@ cc_library(
         "//statechart/internal:runtime",
         "//statechart/internal:utility",
         "//statechart/platform:types",
-        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_glog//:glog",
     ],
@@ -143,6 +142,7 @@ cc_test(
         "//statechart/internal/testing:mock_datamodel",
         "//statechart/internal/testing:mock_executable_content",
         "//statechart/internal/testing:mock_runtime",
+        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
 )

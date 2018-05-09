@@ -23,7 +23,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "absl/memory/memory.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
@@ -32,7 +31,6 @@
 #include "statechart/internal/testing/mock_runtime.h"
 
 using ::absl::StrCat;
-using ::absl::WrapUnique;
 using testing::_;
 using testing::DoAll;
 using testing::ElementsAreArray;
@@ -1577,7 +1575,7 @@ TEST(LightWeightDatamodel, Clone) {
     CHECK(lwdm->AssignExpression("key1", R"("value")"));
     CHECK(lwdm->Declare("key2"));
     CHECK(lwdm->AssignExpression("key2", R"([ "value", { "foo" : "bar"} ])"));
-    clone.reset(lwdm->Clone());
+    clone = lwdm->Clone();
   }
 
   {
@@ -1594,7 +1592,7 @@ TEST(LightWeightDatamodel, Clone) {
 
 TEST_F(LightWeightDatamodelTest, ArrayReferenceIteratorTest) {
   EXPECT_TRUE(DeclareAndAssign("myarray", "[0, 2, 4]"));
-  auto iterator = WrapUnique(datamodel_->EvaluateIterator("myarray"));
+  auto iterator = datamodel_->EvaluateIterator("myarray");
   ASSERT_NE(nullptr, iterator);
 
   for (int i = 0; i < 3; ++i) {
@@ -1607,7 +1605,7 @@ TEST_F(LightWeightDatamodelTest, ArrayReferenceIteratorTest) {
 }
 
 TEST_F(LightWeightDatamodelTest, ArrayValueIteratorTest) {
-  auto iterator = WrapUnique(datamodel_->EvaluateIterator("[0, 2, 4]"));
+  auto iterator = datamodel_->EvaluateIterator("[0, 2, 4]");
   ASSERT_NE(nullptr, iterator);
 
   for (int i = 0; i < 3; ++i) {
@@ -1621,7 +1619,7 @@ TEST_F(LightWeightDatamodelTest, ArrayValueIteratorTest) {
 
 TEST_F(LightWeightDatamodelTest, ArrayIteratorErrorExpressionTest) {
   for (const auto& expr : {"1", "myarray", "null", "+"}) {
-    auto iterator = WrapUnique(datamodel_->EvaluateIterator(expr));
+    auto iterator = datamodel_->EvaluateIterator(expr);
     EXPECT_EQ(nullptr, iterator) << "Expression: " << expr;
   }
 }
