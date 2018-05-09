@@ -43,8 +43,7 @@ FunctionDispatcherImpl::FunctionDispatcherImpl() {
 FunctionDispatcherImpl::FunctionDispatcherImpl(
     const FunctionDispatcherImpl& other) {
   for (const auto& entry : other.function_map_) {
-    function_map_.emplace(entry.first,
-                          ::absl::WrapUnique(entry.second->Clone()));
+    function_map_.emplace(entry.first, entry.second->Clone());
   }
 }
 
