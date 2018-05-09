@@ -18,7 +18,6 @@
 
 #include "statechart/internal/function_dispatcher_builtin.h"
 #include "statechart/platform/map_util.h"
-#include "absl/memory/memory.h"
 
 namespace state_chart {
 
