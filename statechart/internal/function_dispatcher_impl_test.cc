@@ -48,9 +48,6 @@ class SomeClass {
 
 class FunctionDispatcherImplTest : public testing::Test {
  protected:
-  virtual void SetUp() {}
-  virtual void TearDown() {}
-
   FunctionDispatcherImpl impl_;
 };
 

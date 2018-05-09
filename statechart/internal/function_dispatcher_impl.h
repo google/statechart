@@ -57,8 +57,7 @@ class BaseFunction {
   virtual bool Execute(const std::vector<const Json::Value*>& inputs,
                        Json::Value* result) = 0;
 
-  // Caller takes ownership.
-  virtual BaseFunction* Clone() const = 0;
+  virtual std::unique_ptr<BaseFunction> Clone() const = 0;
 
  protected:
   BaseFunction() = default;
@@ -91,9 +90,8 @@ class FunctionWrapper : public BaseFunction {
     return JsonValueCoder<Output>::ToJsonValue(output, result);
   }
 
-  // Caller takes ownership.
-  BaseFunction* Clone() const override {
-    return new FunctionWrapper(*this);
+  std::unique_ptr<BaseFunction> Clone() const override {
+    return absl::WrapUnique(new FunctionWrapper(*this));
   }
 
  protected:

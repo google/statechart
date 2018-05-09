@@ -18,7 +18,6 @@
 
 #include "statechart/internal/function_dispatcher_builtin.h"
 #include "statechart/platform/map_util.h"
-#include "absl/memory/memory.h"
 
 namespace state_chart {
 
@@ -43,8 +42,7 @@ FunctionDispatcherImpl::FunctionDispatcherImpl() {
 FunctionDispatcherImpl::FunctionDispatcherImpl(
     const FunctionDispatcherImpl& other) {
   for (const auto& entry : other.function_map_) {
-    function_map_.emplace(entry.first,
-                          ::absl::WrapUnique(entry.second->Clone()));
+    function_map_.emplace(entry.first, entry.second->Clone());
   }
 }
 
