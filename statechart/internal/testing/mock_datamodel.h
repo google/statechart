@@ -18,6 +18,7 @@
 #define STATE_CHART_INTERNAL_TESTING_MOCK_DATAMODEL_H_
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -43,6 +44,8 @@ class MockIterator : public Iterator {
  public:
   explicit MockIterator(const std::vector<string>& collection)
       : index_(0), collection_(collection) {}
+
+  ~MockIterator() override = default;
 
   bool AtEnd() const override { return index_ >= collection_.size(); }
 
@@ -81,9 +84,10 @@ class MockDatamodel : public Datamodel {
   MOCK_CONST_METHOD1(EncodeParameters, string(const std::map<string, string>&));
   MOCK_CONST_METHOD0(DebugString, string());
   MOCK_METHOD0(Clear, void());
-  MOCK_CONST_METHOD0(Clone, Datamodel*());
+  MOCK_CONST_METHOD0(Clone, std::unique_ptr<Datamodel>());
   MOCK_CONST_METHOD0(SerializeAsString, string());
-  MOCK_CONST_METHOD1(EvaluateIterator, Iterator*(const string&));
+  MOCK_CONST_METHOD1(EvaluateIterator,
+                     std::unique_ptr<Iterator>(const string&));
   MOCK_METHOD1(ParseFromString, bool(const string&));
   MOCK_CONST_METHOD0(GetRuntime, const Runtime*());
   MOCK_METHOD1(SetRuntime, void(const Runtime*));

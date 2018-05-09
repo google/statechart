@@ -85,14 +85,15 @@ class LightWeightDatamodel : public Datamodel {
   // Returns a copy of this datamodel. The clone points to the same
   // FunctionDispatcher and Runtime and will be valid only until the original
   // FunctionDispatcher and Runtime remain valid.
-  Datamodel* Clone() const override;
+  std::unique_ptr<Datamodel> Clone() const override;
 
   // Returns a string representation used for serializing the contents of the
   // datamodel. The FunctionDispatcher pointed to by 'dispatcher_' is not
   // serialized.
   string SerializeAsString() const override;
 
-  Iterator* EvaluateIterator(const string& location) const;
+  std::unique_ptr<Iterator> EvaluateIterator(
+      const string& location) const override;
 
   // Declares a variable 'location' in the store and assigns 'value'
   // (initializes) to the variable.

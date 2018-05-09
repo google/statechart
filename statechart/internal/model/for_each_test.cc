@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "absl/memory/memory.h"
 #include "statechart/internal/testing/mock_datamodel.h"
 #include "statechart/internal/testing/mock_executable_content.h"
 #include "statechart/internal/testing/mock_runtime.h"
@@ -26,6 +27,7 @@ namespace model {
 namespace {
 
 using ::testing::_;
+using ::testing::ByMove;
 using ::testing::InSequence;
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -46,7 +48,8 @@ TEST(ForEach, LoopWithIndexAndItem) {
 
   // Result owned by 'for_each'.
   EXPECT_CALL(mock_datamodel, EvaluateIterator("[0, 2, 4]"))
-      .WillOnce(Return(new MockIterator({"0", "2", "4"})));
+      .WillOnce(
+          Return(ByMove(absl::WrapUnique(new MockIterator({"0", "2", "4"})))));
 
   // Value assigned in right sequence.
   {
@@ -93,7 +96,7 @@ TEST(ForEach, LoopWithNoBody) {
 
   // Result owned by 'for_each'.
   EXPECT_CALL(mock_datamodel, EvaluateIterator("[1, 0]"))
-      .WillOnce(Return(new MockIterator({"1", "0"})));
+      .WillOnce(Return(ByMove(absl::WrapUnique(new MockIterator({"1", "0"})))));
 
   // Value assigned in right sequence.
   {
@@ -134,7 +137,8 @@ TEST(ForEach, LoopWithNoIndex) {
 
   // Result owned by 'for_each'.
   EXPECT_CALL(mock_datamodel, EvaluateIterator("[0, 2, 4]"))
-      .WillOnce(Return(new MockIterator({"0", "2", "4"})));
+      .WillOnce(
+          Return(ByMove(absl::WrapUnique(new MockIterator({"0", "2", "4"})))));
 
   // Value assigned in right sequence.
   {
@@ -168,7 +172,7 @@ TEST(ForEach, LoopOverIllegalCollectionIsError) {
 
   // Illegal collection.
   EXPECT_CALL(mock_datamodel, EvaluateIterator("foo"))
-      .WillOnce(Return(nullptr));
+      .WillOnce(Return(ByMove(std::unique_ptr<Iterator>())));
 
   ForEach for_each("foo", "item", "", &mock_loop_body);
 
@@ -197,7 +201,8 @@ TEST(ForEach, IllegalItemLocationIsError) {
 
   // Result owned by 'for_each'.
   EXPECT_CALL(mock_datamodel, EvaluateIterator("[0, 2, 4]"))
-      .WillOnce(Return(new MockIterator({"0", "2", "4"})));
+      .WillOnce(
+          Return(ByMove(absl::WrapUnique(new MockIterator({"0", "2", "4"})))));
 
   // Illegal declaration.
   EXPECT_CALL(mock_datamodel, Declare("item")).WillOnce(Return(false));
@@ -225,7 +230,8 @@ TEST(ForEach, IllegalIndexLocationIsError) {
 
   // Result owned by 'for_each'.
   EXPECT_CALL(mock_datamodel, EvaluateIterator("[0, 2, 4]"))
-      .WillOnce(Return(new MockIterator({"0", "2", "4"})));
+      .WillOnce(
+          Return(ByMove(absl::WrapUnique(new MockIterator({"0", "2", "4"})))));
 
   // Legal item.
   EXPECT_CALL(mock_datamodel, Declare("item")).WillOnce(Return(true));
@@ -257,7 +263,8 @@ TEST(ForEach, LoopTerminatesEarlyOnBodyExecutionError) {
 
   // Result owned by 'for_each'.
   EXPECT_CALL(mock_datamodel, EvaluateIterator("[0, 2, 4]"))
-      .WillOnce(Return(new MockIterator({"0", "2", "4"})));
+      .WillOnce(
+          Return(ByMove(absl::WrapUnique(new MockIterator({"0", "2", "4"})))));
 
   // Body returns an error on the second iteration.
   EXPECT_CALL(mock_loop_body, Execute(&mock_runtime))
