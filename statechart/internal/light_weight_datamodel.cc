@@ -1652,8 +1652,8 @@ bool LightWeightDatamodel::ParseFromString(const string& data) {
 void LightWeightDatamodel::Clear() { store_.clear(); }
 
 // override
-Datamodel* LightWeightDatamodel::Clone() const {
-  LightWeightDatamodel* lwdm = new LightWeightDatamodel(this->dispatcher_);
+std::unique_ptr<Datamodel> LightWeightDatamodel::Clone() const {
+  auto lwdm = absl::WrapUnique(new LightWeightDatamodel(this->dispatcher_));
   lwdm->store_ = this->store_;
   lwdm->runtime_ = this->runtime_;
   return lwdm;
@@ -1669,7 +1669,9 @@ bool LightWeightDatamodel::EvaluateJsonExpression(const string& expr,
   return true;
 }
 
-Iterator* LightWeightDatamodel::EvaluateIterator(const string& location) const {
+// override
+std::unique_ptr<Iterator> LightWeightDatamodel::EvaluateIterator(
+    const string& location) const {
   // Only arrays are supported.
   Token token;
   if (!ProcessExpression(store_, GetRuntime(), dispatcher_, location, &token) ||
@@ -1680,11 +1682,11 @@ Iterator* LightWeightDatamodel::EvaluateIterator(const string& location) const {
   }
   // If it is a location in the store, do not copy, use reference.
   if (token.IsReference()) {
-    return new ArrayReferenceIterator(token.Value());
+    return absl::make_unique<ArrayReferenceIterator>(token.Value());
   }
   // 'token' has a value. 'token.MutableValue()' is not NULL. Move value into
   // the iterator.
-  return new ArrayValueIterator(token.MutableValue());
+  return absl::make_unique<ArrayValueIterator>(token.MutableValue());
 }
 
 bool LightWeightDatamodel::AssignJson(const string& location,

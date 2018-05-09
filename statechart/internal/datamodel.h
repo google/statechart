@@ -18,6 +18,7 @@
 #define STATE_CHART_INTERNAL_DATAMODEL_H_
 
 #include <map>
+#include <memory>
 #include <string>
 
 #include "statechart/platform/types.h"
@@ -114,7 +115,7 @@ class Datamodel {
   virtual void Clear() = 0;
 
   // Returns a copy of this datamodel.
-  virtual Datamodel* Clone() const = 0;
+  virtual std::unique_ptr<Datamodel> Clone() const = 0;
 
   // Returns a string representation used for serializing the contents of the
   // datamodel.
@@ -124,7 +125,8 @@ class Datamodel {
   // nullptr if the location is an invalid collection location. Iterator may
   // become invalid if the underlying collection is modified.
   // Caller takes ownership of result.
-  virtual Iterator* EvaluateIterator(const string& location) const = 0;
+  virtual std::unique_ptr<Iterator> EvaluateIterator(
+      const string& location) const = 0;
 
   // Returns a const-pointer to the Runtime associated with this datamodel.
   // If a datamodel is being used outside the context of state_charts, then this
