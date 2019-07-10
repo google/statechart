@@ -9,7 +9,7 @@ and Communication.
 This is a C++ library that implements the SCXML specification. Instead of XML, a
 StateChart is represented as a StateChart protobuf.
 
-# Features
+## Features
 Many features from the SCXML standard have been implemented.
 
 * Composite State
@@ -19,11 +19,11 @@ Many features from the SCXML standard have been implemented.
 * Executable Statements (Raise, Log, Assign, If, ForEach, Send)
 * Serialize/Deserialize the state machine
 
-# TODO
+## TODO
 
 * History
 
-# Example
+## Example
 Here's an example of a StateChart that describes a Microwave.
 
 ![Microwave StateChart](statechart/example/microwave_statechart.svg "Microwave StateChart")
@@ -31,7 +31,7 @@ Here's an example of a StateChart that describes a Microwave.
 You can see [//statechart/example/microwave_example_main.cc](statechart/example/microwave_example_main.cc)
 for details on how to specify such a StateChart as a StateChart proto and how to use it in code.
 
-# Usage
+## Usage
 
 To build the library you'll need bazel. You can download and install it from [here](https://www.bazel.build/).
 
@@ -50,10 +50,11 @@ bazel test //statechart/...
 bazel run //statechart/example:microwave_example_main -- --alsologtostderr
 ```
 
-# Disclaimer
+## Disclaimer
+
 This is not an officially supported Google product.
 
-# References
+## References
 
 * David Harel, 1987, Statecharts: a visual formalism for complex systems,
 Science of Computer Programming.
