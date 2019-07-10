@@ -5,7 +5,7 @@ description of complex interactive systems.
 It extends the conventional state machine formalism with Hierarchy, Concurrency
 and Communication.
 
-[SCXML](https://www.w3.org/TR/scxml/) is a W3C standard based on StaeCharts.
+[SCXML](https://www.w3.org/TR/scxml/) is a W3C standard based on StateCharts.
 This is a C++ library that implements the SCXML specification. Instead of XML, a
 StateChart is represented as a StateChart protobuf.
 
